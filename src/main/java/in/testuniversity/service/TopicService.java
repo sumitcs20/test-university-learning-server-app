@@ -1,7 +1,6 @@
 package in.testuniversity.service;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import in.testuniversity.dto.TopicDTO;
 import in.testuniversity.exception.TopicAlreadyExistsException;
@@ -13,7 +12,7 @@ public interface TopicService {
 	TopicDTO createTopic(TopicDTO topicDTO) throws TopicAlreadyExistsException; 
 	
 	//To fetch all the topics available based on Stream Id
-	Page<TopicDTO> getAllTopicsByStream(Long streamId, Pageable pageable);
+	Page<TopicDTO> getAllTopicsByStream(Long streamId, int page, int size, String sortBy, String sortDir);
 	
 	//To fetch topic based on Topic Id
 	TopicDTO getTopicById(Long topicId) throws TopicNotFoundException;

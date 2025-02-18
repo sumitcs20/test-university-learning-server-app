@@ -1,7 +1,6 @@
 package in.testuniversity.controller;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import in.testuniversity.dto.QuestionDTO;
@@ -50,8 +50,13 @@ public class QuestionController {
 					@ApiResponse(responseCode = "404", description = "Questions not found")
 			})
 	@GetMapping("/topics/{topicId}/questions")
-	public ResponseEntity<Page<QuestionDTO>> getAllQuestionsByTopic(@PathVariable Long topicId, Pageable pageable){
-		Page<QuestionDTO> allQuestions = questionService.getAllQuestionsByTopic(topicId, pageable);
+	public ResponseEntity<Page<QuestionDTO>> getAllQuestionsByTopic(@PathVariable Long topicId,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "questionText") String sortBy,
+			@RequestParam(defaultValue = "asc") String sortDir){
+		
+		Page<QuestionDTO> allQuestions = questionService.getAllQuestionsByTopic(topicId, page, size, sortBy, sortDir);
 		return ResponseEntity.ok(allQuestions);
 	}
 	

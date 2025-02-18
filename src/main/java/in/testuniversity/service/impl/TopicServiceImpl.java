@@ -1,7 +1,11 @@
 package in.testuniversity.service.impl;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import in.testuniversity.dto.TopicDTO;
@@ -50,10 +54,22 @@ public class TopicServiceImpl implements TopicService {
 	}
 
 	@Override
-	public Page<TopicDTO> getAllTopicsByStream(Long streamId, Pageable pageable) {
+	public Page<TopicDTO> getAllTopicsByStream(Long streamId, int page, int size, String sortBy, String sortDir) {
 		if(!streamRepository.existsById(streamId)) {
 			throw new StreamNotFoundException("Stream not found with id:"+streamId);
 		}
+		
+		// Validate sorting field (Security Measure)
+        List<String> allowedSortFields = List.of("topicName", "id");
+        if (!allowedSortFields.contains(sortBy)) {
+            throw new IllegalArgumentException("Invalid sort field: " + sortBy);
+        }
+		
+		//validating the sortDir received for direction(ascending or descending)
+		Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+		
+		//Page based on page#, content size on page and direction of sorting
+		Pageable pageable = PageRequest.of(page, size, direction);
 		Page<Topic> topicsPage = topicRepository.findByStreamId(streamId, pageable);
 		return topicsPage
 				.map(topicMapper::entityToDTO);

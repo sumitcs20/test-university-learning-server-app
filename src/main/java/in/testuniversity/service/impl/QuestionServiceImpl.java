@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import in.testuniversity.dto.QuestionDTO;
@@ -86,11 +88,24 @@ public class QuestionServiceImpl implements QuestionService{
 	}
 	
 	@Override
-	public Page<QuestionDTO> getAllQuestionsByTopic(Long topicId, Pageable pageable) {
+	public Page<QuestionDTO> getAllQuestionsByTopic(Long topicId, int page, int size, String sortBy, String sortDir) {
 		if(!topicRepository.existsById(topicId)) {
 			throw new TopicNotFoundException("Topic not found with id: "+topicId);
 		}
-		Page<Question> questions = questionRepository.findByTopicId(topicId, pageable);
+		
+		// Sorting logic: Ascending or Descending
+		Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+		
+		// Validate sorting field to prevent security issues
+	    List<String> allowedSortFields = List.of("questionText", "id");
+	    if (!allowedSortFields.contains(sortBy)) {
+	        throw new IllegalArgumentException("Invalid sort field: " + sortBy);
+	    }
+		
+		// Create a Pageable object with page number, size, and sorting
+		Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+		
+		Page<Question> questions = questionRepository.findByTopicId(topicId, pageable); //Fetching questions from db
 		return questions
 				.map(questionMapper::entityToDTO);
 	}

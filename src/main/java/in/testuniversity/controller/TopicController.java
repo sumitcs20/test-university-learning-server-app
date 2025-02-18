@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import in.testuniversity.dto.TopicDTO;
@@ -48,8 +49,13 @@ public class TopicController {
 					@ApiResponse(responseCode = "200", description = "Fetched all topics")
 			})
 	@GetMapping("/stream/{streamId}")
-	public ResponseEntity<Page<TopicDTO>> getAllTopicsByStream(@PathVariable Long streamId, Pageable pageable){
-		Page<TopicDTO> topics = topicService.getAllTopicsByStream(streamId, pageable);
+	public ResponseEntity<Page<TopicDTO>> getAllTopicsByStream(@PathVariable Long streamId,
+			@RequestParam(defaultValue = "0") int page,
+			@RequestParam(defaultValue = "10") int size,
+			@RequestParam(defaultValue = "topicName") String sortBy,
+			@RequestParam(defaultValue = "asc") String sortDir){
+		
+		Page<TopicDTO> topics = topicService.getAllTopicsByStream(streamId, page, size, sortBy, sortDir);
 		return ResponseEntity.ok(topics);
 	}
 	
