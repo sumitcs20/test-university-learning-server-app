@@ -2,6 +2,9 @@ package in.testuniversity.service.impl;
 
 import java.util.List;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -54,6 +57,7 @@ public class TopicServiceImpl implements TopicService {
 	}
 
 	@Override
+	@Cacheable(value = "topicsCache", key = "#streamId + '-' + #page + '-' + #size + '-' + #sortBy + '-' + #sortDir")
 	public Page<TopicDTO> getAllTopicsByStream(Long streamId, int page, int size, String sortBy, String sortDir) {
 		if(!streamRepository.existsById(streamId)) {
 			throw new StreamNotFoundException("Stream not found with id:"+streamId);
@@ -69,7 +73,7 @@ public class TopicServiceImpl implements TopicService {
 		Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
 		
 		//Page based on page#, content size on page and direction of sorting
-		Pageable pageable = PageRequest.of(page, size, direction);
+		Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
 		Page<Topic> topicsPage = topicRepository.findByStreamId(streamId, pageable);
 		return topicsPage
 				.map(topicMapper::entityToDTO);
@@ -83,6 +87,7 @@ public class TopicServiceImpl implements TopicService {
 	}
 	
 	@Override
+	@CachePut(value = "topicsCache", key = "topicId")
 	public TopicDTO updateTopic(Long topicId, TopicDTO topicDTO) {
 		Topic topic = topicRepository.findById(topicId)
 				.orElseThrow(()-> new TopicNotFoundException("Topic with topic id: "+topicId+" not found"));
@@ -94,6 +99,7 @@ public class TopicServiceImpl implements TopicService {
 
 
 	@Override
+	@CacheEvict(value = "topicsCache", key = "#streamId")
 	public boolean deleteTopic(Long topicId) {
 		if(!topicRepository.existsById(topicId)) {
 			throw new TopicNotFoundException("Topic with id:"+topicId+" doesn't exist for deletion");

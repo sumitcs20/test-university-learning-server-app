@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -88,6 +91,7 @@ public class QuestionServiceImpl implements QuestionService{
 	}
 	
 	@Override
+	@Cacheable(value = "questionsCache", key = "#topicId + '-' + #page + '-' + #size + '-' + #sortBy + '-' + #sortDir")
 	public Page<QuestionDTO> getAllQuestionsByTopic(Long topicId, int page, int size, String sortBy, String sortDir) {
 		if(!topicRepository.existsById(topicId)) {
 			throw new TopicNotFoundException("Topic not found with id: "+topicId);
@@ -118,6 +122,7 @@ public class QuestionServiceImpl implements QuestionService{
 	}
 
 	@Override
+	@CachePut(value = "questionsCache", key = "questionId")
 	public QuestionDTO updateQuestion(Long questionId, QuestionDTO questionDTO) {
 		Question question = questionRepository.findById(questionId)
 				.orElseThrow(()-> new QuestionNotFoundException("Question not found with id: "+questionId));
@@ -129,6 +134,7 @@ public class QuestionServiceImpl implements QuestionService{
 	
 
 	@Override
+	@CacheEvict(value = "questionsCache", key = "#topicId")
 	public boolean deleteQuestion(Long questionId) {
 		if(!questionRepository.existsById(questionId)) {
 			throw new QuestionNotFoundException("The question not found which you want to delete: "+questionId);

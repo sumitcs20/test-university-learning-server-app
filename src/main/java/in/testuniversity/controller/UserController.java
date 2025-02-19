@@ -16,6 +16,7 @@ import in.testuniversity.exception.UserAlreadyExistsException;
 
 import in.testuniversity.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -32,7 +33,11 @@ public class UserController {
 		this.userService = userService;
 	}
 	
-	@Operation(summary = "Register User", description = "APi to register a user in the application")
+	@Operation(summary = "Register User", description = "APi to register a user in the application",
+			responses = {
+					@ApiResponse(responseCode = "201", description = "User registered sucessfully"),
+					@ApiResponse(responseCode = "409", description = "User already exists")
+			})
 	@PostMapping("/register")
 	public ResponseEntity<UserDTO> registerUser(@Valid @RequestBody UserDTO userDTO) throws UserAlreadyExistsException{
 		UserDTO createduser = userService.registerUser(userDTO);
