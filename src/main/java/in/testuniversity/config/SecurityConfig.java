@@ -45,12 +45,16 @@ public class SecurityConfig {
 		    						"/api/login",
 		    						"/public/**",
 		    						"/swagger-ui/**",  //  Allow Swagger UI
-		                            "/v3/api-docs/**"   //  Allow API Docs
+		                            "/v3/api-docs/**",   //  Allow API Docs
+		                            "/actuator/health",
+		                            "/actuator/info",
+		                            "/h2-console/**"
 		    				).permitAll() //Public end   point login permitted
-		    				// Secure endpoints based on roles:
-	                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+		    				// Secure end points based on roles:
+		    				
+	                        .requestMatchers("/api/admin/**","/actuator/**").hasRole("ADMIN")
 	                        .requestMatchers("/api/instructor/**").hasAnyRole("INSTRUCTOR", "ADMIN")
-	                        .anyRequest().authenticated() // All other endpoints require authentication
+	                        .anyRequest().authenticated() // All other end points require authentication
 		    		)
 		    		.exceptionHandling(ex -> ex
 		    				.authenticationEntryPoint(jwtAuthenticationEntryPoint)
